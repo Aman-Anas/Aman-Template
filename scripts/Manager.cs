@@ -1,7 +1,8 @@
 namespace Game;
 
+using System;
 using Godot;
-using NathanHoad;
+using LiteNetLib;
 using Utilities.Collections;
 
 public partial class Manager : Node
@@ -13,31 +14,40 @@ public partial class Manager : Node
 
     const string defaultConfigPath = "user://config_default.dat";
 
-    [Export]
-    string savePath = "user://saves/default.dat";
-
     public GameConfig Config { get; set; }
 
-    public GameData Data { get; set; }
+    public GameData Data { get; private set; }
+
+    [Export]
+    PackedScene titleScene;
+
+    [Export]
+    PackedScene mainClientScene;
+
+    [Export]
+    PackedScene serverOnlyScene;
 
     public Manager()
     {
         // Just so that other scripts can cache a reference.
         // Config and game data won't be loaded until _Ready() is called
-        Instance ??= this;
-
-        // Initialize MessagePack configuration
-        DataUtils.InitMessagePack();
+        if (Instance == null)
+        {
+            Instance = this;
+        }
     }
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
+        // At this point all other autoloads are also ready
+        // Now we should do actual game stuff (e.g. loading config)
+
         // Load config vars
         LoadConfig();
 
-        // Load our game save
-        LoadGame();
+        // Maybe load game data?
+        Data = new();
     }
 
     public void LoadConfig(bool defaultFile = false)
@@ -68,24 +78,5 @@ public partial class Manager : Node
     public void SaveConfig()
     {
         DataUtils.SaveData(configPath, Config);
-    }
-
-    public void LoadGame(string filename = null)
-    {
-        if (filename != null)
-        {
-            savePath = filename;
-        }
-        Data = DataUtils.LoadFromFileOrNull<GameData>(savePath);
-        Data ??= new();
-    }
-
-    public void SaveGame(string filename = null)
-    {
-        if (filename != null)
-        {
-            savePath = filename;
-        }
-        DataUtils.SaveData(savePath, Data);
     }
 }
