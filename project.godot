@@ -106,6 +106,10 @@ cycle_debug_menu={
 
 3d/physics_engine="JoltPhysics3D"
 
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
+
 [shader_globals]
 
 background_view={
